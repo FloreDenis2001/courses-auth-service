@@ -17,4 +17,3 @@ docker buildx build \
     "${@:2}" \
     --push \
     "$1"
-    # Ensure this points to the directory with Dockerfile
