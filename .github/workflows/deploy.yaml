@@ -1,8 +1,8 @@
-name: CD - Deploy Gateway-service API
+name: CD - Deploy Auth-Server API
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
