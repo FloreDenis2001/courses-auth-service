@@ -1,0 +1,57 @@
+name: CD - Deploy Gateway-service API
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set build number
+        id: build-number
+        run: echo "BUILD_NUMBER=$(date '+%d.%m.%Y.%H.%M.%S')" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker Build and push
+        run: |
+          chmod +x ci/build-publish.sh
+          USERNAME=ion21 \
+          REPO=gateway-service \
+          TAG=${{ env.BUILD_NUMBER }} \
+          ci/build-publish.sh ./
+      #
+      #  update-docker-compose:
+      #    runs-on: ubuntu-latest
+      #    steps:
+      - name: Checkout other repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'FloreDenis2001/courses-gateway'
+          token: ${{ secrets.DEPLOY_ACCESS_TOKEN }}
+          path: 'docker-compose-microservices'
+
+      - name: Update and commit app version in docker-compose.yml in other repository
+        run: |
+          cd courses-gateway/
+          echo -e "Current ./docker-compose.yaml\n$(cat docker-compose.yaml)"
+          sed -i -E 's_(ion21/gateway-service:)([^"]*)_\1'${{ env.BUILD_NUMBER }}'_' docker-compose.yaml
+          echo -e "Updated ./docker-compose.yaml\n$(cat docker-compose.yaml)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "new app version: ${{ env.BUILD_NUMBER }}"
+          git push origin HEAD:master
