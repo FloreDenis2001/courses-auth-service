@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public enum UserRole {
 
-    ADMIN(Sets.newHashSet(UserPermission.USER_READ, UserPermission.USER_WRITE));
+    ADMIN(Sets.newHashSet(UserPermission.USER_READ, UserPermission.USER_WRITE)),
+    CLIENT(Sets.newHashSet(UserPermission.USER_READ));
     private final Set<UserPermission> permissions;
 
     public Set<SimpleGrantedAuthority> getGrantedAuthorities() {

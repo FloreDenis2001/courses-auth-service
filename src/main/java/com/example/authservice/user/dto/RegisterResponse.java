@@ -1,4 +1,6 @@
 package com.example.authservice.user.dto;
 
-public record RegisterResponse(String token, String firstName, String lastName, String phoneNumber, String email, boolean active) {
+import com.example.authservice.system.security.UserRole;
+
+public record RegisterResponse(String token, String firstName, String lastName, String phoneNumber, String email, boolean active , UserRole userRole) {
 }

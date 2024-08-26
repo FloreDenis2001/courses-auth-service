@@ -1,5 +1,6 @@
 package com.example.authservice.user.web;
 import com.example.authservice.system.jwt.JWTTokenProvider;
+import com.example.authservice.user.dto.LoginRequest;
 import com.example.authservice.user.dto.LoginResponse;
 import com.example.authservice.user.dto.RegisterResponse;
 import com.example.authservice.user.dto.UserDTO;
@@ -19,6 +20,7 @@ import static com.example.authservice.utils.Utils.JWT_TOKEN_HEADER;
 import static org.springframework.http.HttpStatus.OK;
 
 
+
 @RestController
 @CrossOrigin
 @RequestMapping("/server/api/v1/")
@@ -31,13 +33,13 @@ public class UserControllerServer {
     private JWTTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody UserDTO user) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest user) {
         authenticate(user.email(),user.password());
         User loginUser = userQuerryService.findByEmail(user.email()).get();
         User userPrincipal = getUser(loginUser);
 
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
-        LoginResponse loginResponse= new LoginResponse(jwtHeader.getFirst(JWT_TOKEN_HEADER), userPrincipal.getFirstName(), userPrincipal.getLastName(), userPrincipal.getPhoneNumber(), userPrincipal.getEmail(), userPrincipal.isActive());
+        LoginResponse loginResponse= new LoginResponse(jwtHeader.getFirst(JWT_TOKEN_HEADER), userPrincipal.getFirstName(), userPrincipal.getLastName(), userPrincipal.getPhoneNumber(), userPrincipal.getEmail(), userPrincipal.isActive(),userPrincipal.getUserRole());
         return new ResponseEntity<>(loginResponse,jwtHeader,OK);
     }
 
@@ -60,7 +62,7 @@ public class UserControllerServer {
         this.userCommandService.addUser(user);
         User userPrincipal = userQuerryService.findByEmail(user.email()).get();
         HttpHeaders jwtHeader=getJwtHeader(userPrincipal);
-        RegisterResponse registerResponse= new RegisterResponse(jwtHeader.getFirst(JWT_TOKEN_HEADER), userPrincipal.getFirstName(), userPrincipal.getLastName(), userPrincipal.getPhoneNumber(), userPrincipal.getEmail(), userPrincipal.isActive());
+        RegisterResponse registerResponse= new RegisterResponse(jwtHeader.getFirst(JWT_TOKEN_HEADER), userPrincipal.getFirstName(), userPrincipal.getLastName(), userPrincipal.getPhoneNumber(), userPrincipal.getEmail(), userPrincipal.isActive(),userPrincipal.getUserRole());
         authenticate(user.email(), user.password());
         return new ResponseEntity<>(registerResponse,jwtHeader,OK);
     }
