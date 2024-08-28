@@ -65,6 +65,9 @@ public class User implements UserDetails {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name="profile_url")
+    private String profileUrl;
+
 
 
     public User(Long id, String firstName, String lastName, String phoneNumber, String email, String password, UserRole userRole, LocalDateTime registeredAt, LocalDateTime createdAt, boolean active) {

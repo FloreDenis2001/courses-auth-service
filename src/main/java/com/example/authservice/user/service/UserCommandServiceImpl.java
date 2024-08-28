@@ -73,4 +73,17 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
     }
+
+
+    @Override
+    public void updateProfileUrl(String email, String profileUrl) {
+        Optional<User> user = userRepo.findByEmail(email);
+        if (user.isPresent()) {
+            User x = user.get();
+            x.setProfileUrl(profileUrl);
+            userRepo.saveAndFlush(x);
+        } else {
+            throw new UserNotFoundException("User with email " + email + " not found");
+        }
+    }
 }

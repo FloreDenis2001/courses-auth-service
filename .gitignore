@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore environment variables file
+.env
+
+# Ignore other sensitive files
+application.yml
