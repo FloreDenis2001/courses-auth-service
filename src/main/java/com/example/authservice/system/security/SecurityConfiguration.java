@@ -48,13 +48,26 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userDetailsService);
-        http.csrf(crsf -> crsf.disable()).cors(withDefaults());
-        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS));
-        http.exceptionHandling(exceptionHandling -> exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler).authenticationEntryPoint(jwtAuthenticationEntryPoint));
-        http.authorizeRequests(authorizeRequests -> authorizeRequests.requestMatchers(PUBLIC_URLS).permitAll().anyRequest().authenticated());
+
+        http.csrf(csrf -> csrf.disable())
+                .cors(withDefaults());
+
+        http.sessionManagement(sessionManagement ->
+                sessionManagement.sessionCreationPolicy(STATELESS));
+
+        http.exceptionHandling(exceptionHandling ->
+                exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler)
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint));
+
+        http.authorizeHttpRequests(authorize ->
+                authorize.requestMatchers(PUBLIC_URLS).permitAll()
+                        .anyRequest().authenticated());
+
         http.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {

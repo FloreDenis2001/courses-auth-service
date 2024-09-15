@@ -1,14 +1,13 @@
 package com.example.authservice.user.web;
 
-import com.example.authservice.intercom.b2.B2S3Service;
-import com.example.authservice.user.dto.LoginRequest;
-import com.example.authservice.user.dto.LoginResponse;
-import com.example.authservice.user.dto.RegisterResponse;
-import com.example.authservice.user.dto.UserDTO;
+import com.example.authservice.intercom.b2.B2S3Client;
+import com.example.authservice.user.dto.*;
+import com.example.authservice.user.exception.UserNotFoundException;
 import com.example.authservice.user.model.User;
 import com.example.authservice.user.service.UserCommandService;
 import com.example.authservice.user.service.UserQuerryService;
 import com.example.authservice.system.jwt.JWTTokenProvider;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.authservice.utils.Utils.JWT_TOKEN_HEADER;
@@ -39,7 +38,7 @@ public class UserControllerServer {
     private final UserQuerryService userQuerryService;
     private final AuthenticationManager authenticationManager;
     private final JWTTokenProvider jwtTokenProvider;
-    private final B2S3Service b2S3Service;
+    private final B2S3Client b2S3Service;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest user) {
@@ -55,7 +54,7 @@ public class UserControllerServer {
                 userPrincipal.getPhoneNumber(),
                 userPrincipal.getEmail(),
                 userPrincipal.isActive(),
-                userPrincipal.getProfileUrl() ,
+                userPrincipal.getProfileUrl(),
                 userPrincipal.getUserRole()
         );
         return new ResponseEntity<>(loginResponse, jwtHeader, HttpStatus.OK);
@@ -80,13 +79,13 @@ public class UserControllerServer {
         return new ResponseEntity<>(registerResponse, jwtHeader, HttpStatus.OK);
     }
 
+
     @PostMapping("/updateProfilePicture")
-    @PreAuthorize( "hasRole('ROLE_CLIENT') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateProfilePicture(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty.");
         }
-
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -94,29 +93,68 @@ public class UserControllerServer {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        User currentUser = userQuerryService.findByEmail(authentication.getName()).get();
+        User currentUser = userQuerryService.findByEmail(authentication.getName()).orElse(null);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
 
-        File convertedFile = null;
         try {
-            convertedFile = convertMultiPartToFile(file);
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String fileUrl = b2S3Service.uploadFile(convertedFile, fileName);
 
+            String fileUrl = b2S3Service.uploadFile(file, fileName);
 
             userCommandService.updateProfileUrl(currentUser.getEmail(), fileUrl);
 
             return ResponseEntity.ok(fileUrl);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file.");
-        } finally {
-            if (convertedFile != null && convertedFile.exists()) {
-                if (!convertedFile.delete()) {
-                    System.err.println("Failed to delete temporary file");
-                }
-            }
         }
     }
 
+
+    @PutMapping("/updateProfile")
+    @PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<UpdateResponse> updateProfile(@RequestBody @Valid UpdateRequest updateRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<User> optionalCurrentUser = userQuerryService.findByEmail(authentication.getName());
+        if (optionalCurrentUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        User currentUser = optionalCurrentUser.get();
+
+        try {
+            userCommandService.updateUser(currentUser.getEmail(), updateRequest);
+        } catch (UserNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        User updatedUser = currentUser;
+        if (!currentUser.getEmail().equals(updateRequest.email())) {
+            Optional<User> optionalUpdatedUser = userQuerryService.findByEmail(updateRequest.email());
+            if (optionalUpdatedUser.isPresent()) {
+                updatedUser = optionalUpdatedUser.get();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        }
+
+        UpdateResponse updateResponse = new UpdateResponse(
+                updatedUser.getFirstName(),
+                updatedUser.getLastName(),
+                updatedUser.getPhoneNumber(),
+                updatedUser.getEmail(),
+                updatedUser.getProfileUrl(),
+                updatedUser.getUserRole(),
+                updatedUser.isActive()
+        );
+
+        return ResponseEntity.ok(updateResponse);
+    }
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convFile = File.createTempFile(UUID.randomUUID().toString(), "." + getFileExtension(file.getOriginalFilename()));
@@ -155,4 +193,6 @@ public class UserControllerServer {
         userPrincipal.setCreatedAt(loginUser.getCreatedAt());
         return userPrincipal;
     }
+
+
 }
