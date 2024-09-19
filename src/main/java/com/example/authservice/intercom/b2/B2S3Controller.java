@@ -1,7 +1,4 @@
 package com.example.authservice.intercom.b2;
-
-
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +28,5 @@ public class B2S3Controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while uploading file");
         }
     }
-
-
-
-
-
-
 }
+

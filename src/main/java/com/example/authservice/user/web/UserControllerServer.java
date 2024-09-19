@@ -9,6 +9,7 @@ import com.example.authservice.user.service.UserQuerryService;
 import com.example.authservice.system.jwt.JWTTokenProvider;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import static com.example.authservice.utils.Utils.JWT_TOKEN_HEADER;
 @CrossOrigin
 @RequestMapping("/server/api/v1/")
 @AllArgsConstructor
+@Slf4j
 public class UserControllerServer {
 
     private final UserCommandService userCommandService;
@@ -59,6 +61,38 @@ public class UserControllerServer {
         );
         return new ResponseEntity<>(loginResponse, jwtHeader, HttpStatus.OK);
     }
+
+
+
+    @GetMapping("/getUserRole")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> getUserRole(@RequestHeader("Authorization") String token) {
+        try {
+            String tokenValue = extractToken(token);
+
+            String username = jwtTokenProvider.getSubject(tokenValue);
+            if (jwtTokenProvider.isTokenValid(username, tokenValue)) {
+                User loginUser = userQuerryService.findByEmail(username).get();
+                return ResponseEntity.ok(loginUser.getUserRole().toString());
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while verifying token");
+        }
+    }
+
+
+    public String extractToken(String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        } else {
+            throw new IllegalArgumentException("Invalid Authorization header");
+        }
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody UserDTO userDTO) {
@@ -156,13 +190,7 @@ public class UserControllerServer {
         return ResponseEntity.ok(updateResponse);
     }
 
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = File.createTempFile(UUID.randomUUID().toString(), "." + getFileExtension(file.getOriginalFilename()));
-        try (FileOutputStream fos = new FileOutputStream(convFile)) {
-            fos.write(file.getBytes());
-        }
-        return convFile;
-    }
+
 
     private String getFileExtension(String filename) {
         String[] parts = filename.split("\\.");
