@@ -8,7 +8,7 @@ LABEL description="Docker image for query-service Spring Boot application"
 
 # Set the current working directory inside the image
 WORKDIR /app
-EXPOSE 8082
+EXPOSE 8080
 # Copy maven executable to the image
 COPY mvnw .
 COPY .mvn .mvn

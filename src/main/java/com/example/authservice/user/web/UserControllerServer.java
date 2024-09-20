@@ -65,11 +65,10 @@ public class UserControllerServer {
 
 
     @GetMapping("/getUserRole")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<String> getUserRole(@RequestHeader("Authorization") String token) {
         try {
             String tokenValue = extractToken(token);
-
             String username = jwtTokenProvider.getSubject(tokenValue);
             if (jwtTokenProvider.isTokenValid(username, tokenValue)) {
                 User loginUser = userQuerryService.findByEmail(username).get();
