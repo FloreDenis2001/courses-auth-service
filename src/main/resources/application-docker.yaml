@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: course-service
+  datasource:
+    url: jdbc:mysql://mysql:3306/authservice_db?createDatabaseIfNotExist=true
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQLDialect
+      hibernate.format_sql: true
+    show-sql: true
