@@ -1,6 +1,6 @@
 spring:
   application:
-    name: course-auth-service
+    name: auth-service
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,11 +13,10 @@ spring:
     url: jdbc:mysql://localhost:3306/authservice_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true
     username: root
     password: Decembrie2001
-
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+  jwt:
+    secretKey: asdasdasdasdasd123344asdasdasdasdasasd12321332sadas
+    tokenPrefix: Bearer
+    tokenExpirationAfterDays: 7
 
 server:
   error:
@@ -30,11 +29,9 @@ application:
     secretKey: asdasdasdasdasd123344asdasdasdasdasasd12321332sadas
     tokenPrefix: Bearer
     tokenExpirationAfterDays: 7
-
 aws:
   accessKey: 005df870e6d8e2a0000000003
   secretKey: K005chWsD61WVtb2Sj4SRspzaKKO+wc
   region: us-east-005
-
 b2:
   bucketName: courses-platform
