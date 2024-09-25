@@ -9,10 +9,12 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     show-sql: true
+
   datasource:
     url: jdbc:mysql://localhost:3306/authservice_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&createDatabaseIfNotExist=true
     username: root
     password: Decembrie2001
+
   jwt:
     secretKey: asdasdasdasdasd123344asdasdasdasdasasd12321332sadas
     tokenPrefix: Bearer
