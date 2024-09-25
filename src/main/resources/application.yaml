@@ -18,6 +18,11 @@ spring:
     tokenPrefix: Bearer
     tokenExpirationAfterDays: 7
 
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
 server:
   error:
     include-message: always
