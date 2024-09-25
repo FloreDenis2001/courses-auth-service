@@ -27,7 +27,7 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-  port: 8080
+  port: 8083
 
 aws:
   accessKey: 005df870e6d8e2a0000000003
