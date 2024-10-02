@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationSuccessListener {
-    private LoginAttemptService loginAttemptService;
+    private final LoginAttemptService loginAttemptService;
 
     @Autowired
     public AuthenticationSuccessListener(LoginAttemptService loginAttemptService) {

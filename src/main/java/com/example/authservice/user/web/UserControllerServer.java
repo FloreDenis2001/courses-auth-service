@@ -42,6 +42,26 @@ public class UserControllerServer {
     private final JWTTokenProvider jwtTokenProvider;
     private final B2S3Client b2S3Service;
 
+    @GetMapping("/findId")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+    public ResponseEntity<Long> findId(@RequestHeader("Authorization") String token) {
+        try {
+            String tokenValue = extractToken(token);
+            String username = jwtTokenProvider.getSubject(tokenValue);
+            if (jwtTokenProvider.isTokenValid(username, tokenValue)) {
+                User loginUser = userQuerryService.findByEmail(username).get();
+                return ResponseEntity.ok(loginUser.getId());
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest user) {
         authenticate(user.email(), user.password());
@@ -61,7 +81,6 @@ public class UserControllerServer {
         );
         return new ResponseEntity<>(loginResponse, jwtHeader, HttpStatus.OK);
     }
-
 
 
     @GetMapping("/getUserRole")
@@ -188,7 +207,6 @@ public class UserControllerServer {
 
         return ResponseEntity.ok(updateResponse);
     }
-
 
 
     private String getFileExtension(String filename) {

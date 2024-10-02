@@ -99,7 +99,6 @@ public class User implements UserDetails {
         text += "Registered At : " + this.registeredAt + "\n";
         text += "Created At : " + this.createdAt + "\n";
 
-
         return text;
 
     }
