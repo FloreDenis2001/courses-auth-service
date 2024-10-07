@@ -43,7 +43,10 @@ aws:
 
 b2:
   bucketName: courses-platform
-
+logging:
+  level:
+    org.springframework.cloud.sleuth: DEBUG
+    org.springframework.web.client.RestTemplat: DEBUG
 metrics:
   distribution:
     percentiles-histogram:
@@ -57,3 +60,6 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+
+logstash:
+  destination: localhost:3100

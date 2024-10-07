@@ -1,12 +1,12 @@
 package com.example.authservice.user.web;
 
 import com.example.authservice.intercom.b2.B2S3Client;
+import com.example.authservice.system.jwt.JWTTokenProvider;
 import com.example.authservice.user.dto.*;
 import com.example.authservice.user.exception.UserNotFoundException;
 import com.example.authservice.user.model.User;
 import com.example.authservice.user.service.UserCommandService;
 import com.example.authservice.user.service.UserQuerryService;
-import com.example.authservice.system.jwt.JWTTokenProvider;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,6 +62,8 @@ public class UserControllerServer {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest user) {
+        log.info("M-am logat" + user.email());
+
         authenticate(user.email(), user.password());
         User loginUser = userQuerryService.findByEmail(user.email()).get();
         User userPrincipal = getUser(loginUser);
@@ -86,6 +86,7 @@ public class UserControllerServer {
     @GetMapping("/getUserRole")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
     public ResponseEntity<String> getUserRole(@RequestHeader("Authorization") String token) {
+        log.info("Role user request");
         try {
             String tokenValue = extractToken(token);
             String username = jwtTokenProvider.getSubject(tokenValue);
@@ -114,6 +115,7 @@ public class UserControllerServer {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody UserDTO userDTO) {
+        log.info("M-am inregistrat" + userDTO.email());
         this.userCommandService.addUser(userDTO);
         User userPrincipal = userQuerryService.findByEmail(userDTO.email()).get();
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
