@@ -61,5 +61,5 @@ management:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
 
-logstash:
+logs:
   destination: localhost:3100

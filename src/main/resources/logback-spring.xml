@@ -6,7 +6,7 @@
     <property name="SERVICE_NAME" value="auth-service"/>
 
     <!-- Define the Logstash destination with a default -->
-    <property name="LOGSTASH_DESTINATION" value="${logstash.destination}"/>
+    <springProperty name="LOGSTASH_DESTINATION" source="logs.destination"/>
 
     <!-- Rolling File Appender -->
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">

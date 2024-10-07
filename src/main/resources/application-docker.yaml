@@ -11,5 +11,5 @@ management:
     tracing:
       endpoint: http://zipkin:9411/api/v2/spans
 
-logstash:
+logs:
   destination: logstash:3100
