@@ -30,11 +30,50 @@ springdoc:
     enabled: true
   api-docs:
     enabled: true
+
 server:
   error:
     include-message: always
     include-binding-errors: always
   port: 8083
+
+logging:
+  level:
+    org.springframework.cloud.sleuth: DEBUG
+    org.springframework.web.client.RestTemplat: DEBUG
+
+metrics:
+  distribution:
+    percentiles-histogram:
+      http:
+        server:
+          request: true
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+    endpoint:
+      prometheus:
+        enabled: true
+
+  logging:
+    pattern:
+      level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+    level:
+      root: debug
+    file:
+      name: test.log
+
+logs:
+  destination: localhost:3100
 
 aws:
   accessKey: 005df870e6d8e2a0000000003
@@ -43,23 +82,3 @@ aws:
 
 b2:
   bucketName: courses-platform
-logging:
-  level:
-    org.springframework.cloud.sleuth: DEBUG
-    org.springframework.web.client.RestTemplat: DEBUG
-metrics:
-  distribution:
-    percentiles-histogram:
-      http:
-        server:
-          request: true
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
-
-logs:
-  destination: localhost:3100
