@@ -166,6 +166,11 @@ public class UserControllerServer {
     }
 
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Test");
+    }
+
     @PutMapping("/updateProfile")
     @PreAuthorize("hasRole('ROLE_CLIENT') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<UpdateResponse> updateProfile(@RequestBody @Valid UpdateRequest updateRequest) {
@@ -208,12 +213,6 @@ public class UserControllerServer {
         );
 
         return ResponseEntity.ok(updateResponse);
-    }
-
-
-    private String getFileExtension(String filename) {
-        String[] parts = filename.split("\\.");
-        return parts.length > 1 ? parts[parts.length - 1] : "";
     }
 
     private void authenticate(String username, String password) {
