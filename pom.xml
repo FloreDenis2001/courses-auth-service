@@ -140,6 +140,12 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>20.89.0</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

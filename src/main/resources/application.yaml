@@ -82,3 +82,9 @@ aws:
 
 b2:
   bucketName: courses-platform
+
+stripe:
+  api:
+    key: sk_test_51Q4PIRLiVAqLby1DtZvaDnMsaoT8PBzS9VgNZtxM0O5TY6J2rAvb9bDNQOtCCmlhZPuBiuWejCNmD1BMRPIgwmOc00BmBtIMSD
+  public:
+    key: pk_test_51Q4PIRLiVAqLby1DcSBBSwXTSI5ZYy1wYnPelmkC3OhU9zF9USfEJtBCmhUmIogO8W0hJFdwQvf6R6W9YFi2NLeN00l718ElTJ

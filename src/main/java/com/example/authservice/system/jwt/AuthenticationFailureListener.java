@@ -1,6 +1,6 @@
 package com.example.authservice.system.jwt;
 
-import com.example.authservice.user.dto.LoginAttemptService;
+import com.example.authservice.system.service.LoginAttemptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
